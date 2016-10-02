@@ -37,16 +37,17 @@ export class Organizations extends React.Component {
   render () {
     const {organizations, search} = this.state
     const {classes} = this.props.sheet
+
     return (
       <div className={classes.Organizations}>
         <input type="search" value={search} onChange={this.changeSearch} />
         <h1>Organizations</h1>
         <ul>{
-          organizations.filter(({json: {org_name: orgName}}) => {
-            return orgName.toLowerCase().match(search.toLowerCase())
+          organizations.filter(({json: {name}}) => {
+            return name.toLowerCase().match(search.toLowerCase())
           })
-            .map(({id, json: {org_name: orgName}}) => {
-              return <li key={id}><Link to={`organizations/${id.toString()}`}>{orgName}</Link></li>
+            .map(({id, json: {name}}) => {
+              return <li key={id}><Link to={`organizations/${id.toString()}`}>{name}</Link></li>
             })
         }</ul>
       </div>
