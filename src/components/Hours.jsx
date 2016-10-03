@@ -1,5 +1,5 @@
-import React, {PropTypes} from 'react';
-import _ from 'lodash'
+import React, {Component, PropTypes} from 'react';
+import {get as _get} from 'lodash'
 import DataBlock from '../components/DataBlock'
 import {hours} from '../constants/properties'
 import {useSheet} from '../jss'
@@ -17,7 +17,7 @@ const DAY = 'day'
 const OPEN = 'open'
 const CLOSE = 'close'
 
-export class Hours extends React.Component {
+export class Hours extends Component {
 
   static propTypes = {
     organization: PropTypes.object,
@@ -27,7 +27,7 @@ export class Hours extends React.Component {
   constructor(props) {
     super(props)
     this.state = {
-      data: _.get(props.organization, hours.path)
+      data: _get(props.organization, hours.path)
     }
   }
 
@@ -35,27 +35,71 @@ export class Hours extends React.Component {
     const {data} = this.state
 
     return (
-      <div className="Hours">
-        {
-          Object.keys(data).map(key => {
-            const hours = data[key]
-            const displayLabel = key || '[no label]'
-            return <DataBlock
-              key={displayLabel}
-              label={displayLabel}
-              valueMarkup={Hours.getValueMarkup(hours.hours_atoms)}
-              editMarkup={this.getEditMarkup(hours.hours_atoms, key)}
-              onSave={this.onSave}
-            />
-          })
-        }
-      </div>
+      <DataBlock
+        label="Hours"
+        valueMarkup={this.renderHours(data)}
+        editMarkup={this.renderEdit(data)}
+      />
     )
+    return (
+      <div className="Hours">{
+        data.map(({day, ranges}, index) => {
+          return <DataBlock
+            key={day}
+            label={day}
+            valueMarkup={this.renderRanges(ranges)}
+            editMarkup={this.renderEditRanges(ranges, index)}
+          />
+        })
+      }</div>
+    )
+  }
+
+  renderHours (data) {
+    return data.map(({day, ranges}) => {
+      return <div>
+        <div>{day}</div>
+        <div>{
+          ranges.map(({open, close}) => `${open} - ${close}`).join(', ')
+        }</div>
+      </div>
+    })
+  }
+
+  renderEdit (data) {
+    return data.map(({day, ranges}) => {
+      return <div>
+        <div>{day}</div>
+        
+      </div>
+    })
+  }
+
+  renderEditRanges (ranges, dataIndex) {
+    const {classes} = this.props.sheet
+
+    return ranges.map((range, rangeIndex) => {
+      return <div key={range[DAY]}>
+        <input className={classes.time} type="text" value={range[OPEN]} onChange={this.changeRange(dataIndex, rangeIndex, OPEN)} />
+        <input className={classes.time} type="text" value={range[CLOSE]} onChange={this.changeRange(dataIndex, rangeIndex, CLOSE)} />
+      </div>
+    })
+  }
+
+  changeRange = (dataIndex, rangeIndex, property) => ({target: {value}}) => {
+    const data = {...this.state.data}
+    data[dataIndex][rangeIndex][property] = value
+    this.setState({data})
   }
 
   onSave = () => {
     this.props.onSave(hours.path)(this.state.data)
   }
+
+
+
+
+
 
   changeHours = (key, index, property) => ({target: {value}}) => {
     const data = {...this.state.data}
@@ -76,8 +120,7 @@ export class Hours extends React.Component {
     })
   }
 
-  static getValueMarkup = (hoursAtoms) => {
-    // create a key:value pair of day:hours
+  getValueMarkup = (hoursAtoms) => {
     const dayHoursMap = hoursAtoms.reduce((acc, atom) => {
       if (!Array.isArray(acc[atom.day])) {
         acc[atom.day] = []

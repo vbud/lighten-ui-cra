@@ -2,12 +2,13 @@ import React, { PropTypes } from 'react'
 import {get as _get, set as _set} from 'lodash'
 import DataBlock from '../components/DataBlock'
 import Locations from '../components/Locations'
-import Contacts from '../components/Contacts'
 import Hours from '../components/Hours'
 import http from 'superagent'
 import {
   notes,
-  usageRequirements,
+  accessibility,
+  eligiblePopulation,
+  whatToBring,
   languagesSpoken,
   faithBased,
   services,
@@ -41,7 +42,7 @@ export class Organization extends React.Component {
         this.setState((state) => {
           return {
             ...state,
-            organization: response.body
+            organization: response.body.json
           }
         })
       })
@@ -50,19 +51,17 @@ export class Organization extends React.Component {
   render () {
     const {organization} = this.state
     if (!organization) return null
+    console.log(organization)
 
     const {classes} = this.props.sheet 
 
     return (
       <div className={classes.Organization}>
         <section>
-          <h1>{organization.json.org_name}</h1>
-          <p>{organization.json.description}</p>
+          <h1>{organization.name}</h1>
+          <p>{organization.description}</p>
         </section>
         <section>
-          <Contacts
-            organization={organization}
-            onSave={this.onSave} />
           <Hours
             organization={organization}
             onSave={this.onSave}
@@ -75,25 +74,35 @@ export class Organization extends React.Component {
         </section>
 
         <section>
-          <h2>{usageRequirements.label}</h2>
-          {this.atomsMarkup(usageRequirements.path)}
+          <h2>Usage requirements</h2>
           <DataBlock
             label={languagesSpoken.label}
             values={_get(organization, languagesSpoken.path)}
-            onSave={this.onSave(languagesSpoken.path)} />
-          {this.atomsMarkup('json.accessiblity.accessibility_atoms')}
+            onSave={this.onSave(languagesSpoken.path)}
+          />
+          <DataBlock
+            label={eligiblePopulation.label}
+            values={_get(organization, eligiblePopulation.path)}
+            onSave={this.onSave(eligiblePopulation.path)}
+          />
+          <DataBlock
+            label={whatToBring.label}
+            values={_get(organization, whatToBring.path)}
+            onSave={this.onSave(whatToBring.path)}
+          />
+          <DataBlock
+            label={accessibility.label}
+            values={_get(organization, accessibility.path)}
+            onSave={this.onSave(accessibility.path)}
+          />
           <DataBlock
             label={faithBased.label}
             value={_get(organization, faithBased.path)}
-            onSave={this.onSave(languagesSpoken.path)} />
+            onSave={this.onSave(faithBased.path)}
+          />
         </section>
 
-        <section>
-          <h2>Locations</h2>
-          <Locations
-            organization={organization}
-            onSave={this.onSave} />
-        </section>
+
 
         <section>
           <h2>Services</h2>
@@ -105,6 +114,13 @@ export class Organization extends React.Component {
         </section>
       </div>
     )
+
+    // <section>
+    // <h2>Locations</h2>
+    // <Locations
+    //   organization={organization}
+    //   onSave={this.onSave} />
+    // </section>
   }
 
   onSave = (path) => (value) => {
@@ -121,21 +137,6 @@ export class Organization extends React.Component {
           return console.error(error)
         }
       })
-  }
-
-  atomsMarkup = (pathToAtoms) => {
-    const atoms = _get(this.state.organization, pathToAtoms)
-    return atoms.reduce((acc, atom, i) => {
-      if (atom.kind) {
-        acc.push(<DataBlock
-          key={atom.kind}
-          label={atom.kind}
-          values={atom.keys}
-          onSave={this.onSave(`${pathToAtoms}[${i}].keys`)}
-        />)
-      }
-      return acc
-    }, [])
   }
 }
 
