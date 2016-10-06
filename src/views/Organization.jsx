@@ -131,7 +131,9 @@ export class Organization extends React.Component {
     this.setState({organization})
 
     http.put(`/api/organizations/${this.props.params.organizationId}/`)
-      .send(this.state.organization)
+      .send({
+        json: this.state.organization
+      })
       .end((error, response) => {
         if (error) {
           return console.error(error)
