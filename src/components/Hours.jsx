@@ -1,5 +1,5 @@
-import React, {PropTypes} from 'react';
-import _ from 'lodash'
+import React, {Component, PropTypes} from 'react';
+import {get as _get} from 'lodash'
 import DataBlock from '../components/DataBlock'
 import {hours} from '../constants/properties'
 import {useSheet} from '../jss'
@@ -10,84 +10,90 @@ const styles = {
   },
   time: {
     width: '70px'
+  },
+  td: {
+    'padding-right': '8px',
   }
 }
 
-const DAY = 'day'
-const OPEN = 'open'
-const CLOSE = 'close'
-
-export class Hours extends React.Component {
+export class Hours extends Component {
 
   static propTypes = {
     organization: PropTypes.object,
     onSave: PropTypes.func.isRequired,
   }
 
-  constructor(props) {
+  constructor (props) {
     super(props)
     this.state = {
-      data: _.get(props.organization, hours.path)
+      data: _get(props.organization, hours.path)
     }
   }
 
-  render() {
+  render () {
     const {data} = this.state
 
     return (
-      <div className="Hours">
-        {
-          Object.keys(data).map(key => {
-            const hours = data[key]
-            const displayLabel = key || '[no label]'
-            return <DataBlock
-              key={displayLabel}
-              label={displayLabel}
-              valueMarkup={Hours.getValueMarkup(hours.hours_atoms)}
-              editMarkup={this.getEditMarkup(hours.hours_atoms, key)}
-              onSave={this.onSave}
-            />
-          })
-        }
-      </div>
+      <DataBlock
+        label="Hours"
+        valueMarkup={this.renderHours(data)}
+        editMarkup={this.renderEdit(data)}
+        onSave={this.onSave}
+      />
     )
+  }
+
+  renderHours (data) {
+    const {classes} = this.props.sheet
+
+    return <table>
+      <tbody>{
+        data.map(({day, ranges}, index) => {
+          return <tr key={index}>
+            <td className={classes.td}>{day}</td>
+            <td className={classes.td}>{ranges.map(({open, close}) => `${open} - ${close}`).join(', ')}</td>
+          </tr>
+        })
+      }</tbody>
+    </table>
+  }
+
+  renderEdit (data) {
+    const {classes} = this.props.sheet
+
+    return data.map(({day, ranges}, dataIndex) => {
+      return <div key={dataIndex}>
+        <div>{day}</div>
+        <div>{
+          ranges.map(({open, close}, rangeIndex) => {
+            return <div key={rangeIndex}>
+              <input
+                type="text"
+                className={classes.time}
+                value={open}
+                onChange={this.changeRange(dataIndex, rangeIndex, 'open')}
+              />
+              <input
+                type="text"
+                className={classes.time}
+                value={close}
+                onChange={this.changeRange(dataIndex, rangeIndex, 'close')}
+              />
+            </div>
+          })
+        }</div>
+      </div>
+    })
+  }
+
+  changeRange = (dataIndex, rangeIndex, property) => ({target: {value}}) => {
+    const data = [...this.state.data]
+    data[dataIndex].ranges[rangeIndex][property] = value
+    this.setState({data})
   }
 
   onSave = () => {
     this.props.onSave(hours.path)(this.state.data)
-  }
-
-  changeHours = (key, index, property) => ({target: {value}}) => {
-    const data = {...this.state.data}
-    data[key].hours_atoms[index][property] = value
-    this.setState({data})
-  }
-
-  getEditMarkup = (hoursAtoms, dataKey) => {
-    const {classes} = this.props.sheet
-
-    return hoursAtoms.map((atom, index) => {
-      return <div key={index}>
-        <input className={classes.day} type="text" value={atom[DAY]} onChange={this.changeHours(dataKey, index, DAY)}/>
-        <input className={classes.time} type="text" value={atom[OPEN]} onChange={this.changeHours(dataKey, index, OPEN)}/>
-        <input className={classes.time} type="text" value={atom[CLOSE]}
-               onChange={this.changeHours(dataKey, index, OPEN)}/>
-      </div>
-    })
-  }
-
-  static getValueMarkup = (hoursAtoms) => {
-    // create a key:value pair of day:hours
-    const dayHoursMap = hoursAtoms.reduce((acc, atom) => {
-      if (!Array.isArray(acc[atom.day])) {
-        acc[atom.day] = []
-      }
-      acc[atom.day].push(`${atom.open} - ${atom.close}`)
-      return acc
-    }, {})
-    return Object.keys(dayHoursMap).map((day) => {
-      return <div key={day}>{`${day}: ${dayHoursMap[day].join(', ')}`}</div>
-    })
   }
 }
 

@@ -1,36 +1,44 @@
 export const notes = {
-  path: 'json.notes',
+  path: 'notes',
   label: 'Notes'
 }
 
-export const usageRequirements = {
-  path: 'json.usage_requirements.usage_requirement_atoms',
-  label: 'Usage requirements'
+export const accessibility = {
+  path: 'accessibility',
+  label: 'Accessibility',
+}
+
+export const eligiblePopulation = {
+  path: 'eligible_population',
+  label: 'Eligible population',
+}
+
+export const whatToBring = {
+  path: 'what_to_bring',
+  label: 'What to bring',
 }
 
 export const languagesSpoken = {
-  path: 'json.languages_spoken',
+  path: 'languages_spoken',
   label: 'Languages spoken',
 }
 
 export const faithBased = {
-  path: 'json.faith_based',
+  path: 'faith_based',
   label: 'Faith-based',
 }
 
-export const contacts = {
-  path: 'json.contacts',
-  label: 'To get connected',
-}
-
 export const hours = {
-  path: 'json.hours',
-  label: 'Hours'
+  path: 'hours',
+  label: 'Hours',
 }
 
 export const services = {
-  path: 'json.service_description.service_catagories[0].keys',
-  label: 'Services'
+  path: 'services',
+  label: 'Services',
 }
 
-export const addressKeys = ['service_site', 'mailing']
+export const locations = {
+  path: 'locations',
+  label: 'Locations'
+}
