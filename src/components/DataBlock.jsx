@@ -46,7 +46,7 @@ export class DataBlock extends Component {
     this.props.onChange(value)
   }
 
-  defaultChangeValueinValues = (index) => (event) => {
+  defaultChangeValueInValues = (index) => (event) => {
     const values = this.state.values.slice()
     values[index] = event.target.value
     this.setState({values})
@@ -79,7 +79,7 @@ export class DataBlock extends Component {
       values
     } = this.state
     const changeValueFunc = changeValue || this.defaultChangeValue
-    const changeValueInValuesFunc = changeValueInValues || this.defaultChangeValueinValues
+    const changeValueInValuesFunc = changeValueInValues || this.defaultChangeValueInValues
 
     let dataMarkup
     if (isEditing) {

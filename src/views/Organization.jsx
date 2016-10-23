@@ -61,6 +61,7 @@ export class Organization extends React.Component {
           <h1>{organization.name}</h1>
           <p>{organization.description}</p>
         </section>
+
         <section>
           <Hours
             organization={organization}
@@ -102,10 +103,11 @@ export class Organization extends React.Component {
           />
         </section>
 
-
+        <Locations
+          organization={organization}
+          onSave={this.onSave} />
 
         <section>
-          <h2>Services</h2>
           <DataBlock
             label={services.label}
             values={_get(organization, services.path)}
@@ -114,13 +116,6 @@ export class Organization extends React.Component {
         </section>
       </div>
     )
-
-    // <section>
-    // <h2>Locations</h2>
-    // <Locations
-    //   organization={organization}
-    //   onSave={this.onSave} />
-    // </section>
   }
 
   onSave = (path) => (value) => {

@@ -9,32 +9,19 @@ export default class Location extends React.Component {
     onSave: PropTypes.func.isRequired,
   }
 
-  constructor (props) {
-    super(props)
-    this.state = {
-      value: props.location.addrtxtlines
-    }
-  }
-
   render () {
-    const {value} = this.state
-    const {name} = this.props.location
+    const {location} = this.props
 
-    const address = value.join(', ')
-    const uriEncodedAddress = encodeURIComponent(address)
     const googleMapsIframeUrl = [
       'https://www.google.com/maps/embed/v1/place',
       '?key=AIzaSyCLeuAb-KkMbNrB489TN77duPkdsqHCTco',
       '&zoom=14',
-      `&q=${uriEncodedAddress}`
+      `&q=${encodeURIComponent(Location.buildAddressString(location.physical_address))}`
     ].join('')
 
     return (
       <div className="Location">
-        <DataBlock
-          label={name}
-          value={address}
-          onSave={this.onSave} />
+        {this.renderPhysicalAddress(location.physical_address)}
         <iframe
           width="600"
           height="450"
@@ -46,11 +33,20 @@ export default class Location extends React.Component {
     )
   }
 
-  onSave = (value) => {
-    this.props.onSave(Location.formatValue(value))
+  renderPhysicalAddress (address) {
+    return ['primary', 'city', 'state', 'zipcode', 'country'].map((key) => (
+      <DataBlock
+        key={key}
+        label={key}
+        value={address[key]}
+        onSave={this.onSave(key)} />
+    ))
   }
 
-  static formatValue = (value) => {
-    return value.split(', ')
+  onSave = (key) => (value) => {
+    const {path, onSave} = this.props
+    onSave(`${path}.physical_address.${key}`)(value)
   }
+
+  static buildAddressString = ({primary, city, state, zipcode, country}) => `${primary} ${city} ${state} ${zipcode} ${country}`
 }

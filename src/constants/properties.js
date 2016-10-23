@@ -38,4 +38,7 @@ export const services = {
   label: 'Services',
 }
 
-export const addressKeys = ['service_site', 'mailing']
+export const locations = {
+  path: 'locations',
+  label: 'Locations'
+}
